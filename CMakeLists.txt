@@ -5,7 +5,7 @@ PROJECT(cgdoc)
 
 SET(CMAKE_EXPORT_COMPILE_COMMANDS ON)
 
-FILE(GLOB SOURCES "src/*.c")
+FILE(GLOB SOURCES "src/*.c", "src/*.h", "src/**/*.c", "src/**/*.h")
 
 # add the executable
 ADD_EXECUTABLE(cgdoc ${SOURCES})

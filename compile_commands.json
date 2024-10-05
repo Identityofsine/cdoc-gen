@@ -1,0 +1,8 @@
+[
+{
+  "directory": "/home/kevin/software/cdoc-gen/build",
+  "command": "/usr/bin/cc    -o CMakeFiles/cgdoc.dir/src/main.c.o -c /home/kevin/software/cdoc-gen/src/main.c",
+  "file": "/home/kevin/software/cdoc-gen/src/main.c",
+  "output": "CMakeFiles/cgdoc.dir/src/main.c.o"
+}
+]
