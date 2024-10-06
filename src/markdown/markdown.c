@@ -5,6 +5,11 @@
 //@TITLE Write a markdown file
 //@DESC Writes a markdown file from a list of blocks.
 void write_markdown(const char* source_file, const char* filename, const char* path, Block** blocks, size_t size) {
+
+	if (size == 0) {
+		return;
+	}
+
 	FILE *file = fopen(path, "w");
 	if (file == NULL) {
 		fprintf(stderr, "Error: Could not open file %s\n", path);
@@ -25,9 +30,6 @@ void write_markdown(const char* source_file, const char* filename, const char* p
 		ext = "c";
 	} 
 
-	if (size == 0) {
-		return;
-	}
 
 	fprintf(file, "%s %s\n", MARKDOWN_H1, filename);
 
