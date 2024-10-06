@@ -4,7 +4,6 @@
 #include <string.h>
 
 Line *line_new(char *content, size_t size) {
-	printf("line_new(%s, %lu)\n", content, size);
   Line *line = fxMemAlloc(sizeof(Line));
 	line->size = (size_t)fxMemAlloc(sizeof(size_t));
   line->content = fxMemAlloc(size + 1);
@@ -15,7 +14,7 @@ Line *line_new(char *content, size_t size) {
 
 Text *text_new() {
   Text *text = fxMemAlloc(sizeof(Text));
-  text->lines = fxMemAlloc(sizeof(Line *));
+	text->lines = fxMemAlloc(sizeof(Line *));
   text->size = 0;
   return text;
 }
@@ -27,6 +26,8 @@ Text *text_push(Text *text, Line *line) {
 	}
 	int sz = (text->size);
   text->size++;
+	text->lines = fxMemRealloc(text->lines, sizeof(Line *) * text->size);  // Resize for Line* pointers
+	text->lines[sz] = line;
   return text;
 }
 
@@ -41,7 +42,8 @@ Block *block_new() {
   Block *block = fxMemAlloc(sizeof(Block));
   block->title = NULL;
   block->desc = NULL;
-  block->lines = fxMemAlloc(sizeof(Text *));
+  block->lines = text_new();
+	block->type = 0;
   return block;
 }
 
@@ -52,7 +54,7 @@ void block_set_title(Block *block, Line *title) {
 void block_set_desc(Block *block, Text *desc) { block->desc = desc; }
 
 void block_push_line(Block *block, Line *line) {
-  text_push(*block->lines, line);
+  text_push(block->lines, line);
 }
 
 void block_print(Block *block) {
@@ -68,8 +70,8 @@ void block_print(Block *block) {
   if (block->lines != NULL) {
     printf("Lines:\n");
     if (block->lines != NULL) {
-      for (size_t i = 0; i < (*block->lines)->size; i++) {
-        printf("  %s\n", (*block->lines)->lines[i]->content);
+      for (size_t i = 0; i < (block->lines)->size; i++) {
+        printf("  %s\n", (block->lines)->lines[i]->content);
       }
     }
   }
@@ -154,7 +156,7 @@ Block **doc_parse(char **lines, size_t size) {
   int block_type = 0;
   bool in_block = false;
 	if(size == 0) {
-		printf("Error: No lines to parse\n");
+		printf("Error: File Empty\n");
 		return NULL;
 	}
 	if(lines == NULL) {
@@ -188,36 +190,73 @@ Block **doc_parse(char **lines, size_t size) {
         if (strip_line[j] == '@') {
           // check if the comment is a section
           const char *section = strip_line + j;
-          if (COMPARE_DELIM(section, BLOCK_DELIM)) {
+					if (COMPARE_DELIM(section, SECTION_START_DELIM)) {
 						if (in_block) {
 							//TODO handle error
-							printf("Error: Block not closed\n");
-							return NULL;
+							printf("Error: SECTION not closed (Line: %d)\n", i);
+							continue;
+						}
+						in_block = true;
+						block_type = SECTION_BLOCK; 
+					}
+					else if (COMPARE_DELIM(section, BLOCK_DELIM)) {
+						if (in_block) {
+							//TODO handle error
+							printf("Error: Block not closed (Line: %d)\n", i);
+							continue;
 						}
             in_block = true;
           } else if (COMPARE_DELIM(section, ENDBLOCK_DELIM)) {
-            in_block = false;
-            list_push(blocks, block);
-            block = block_new();
-            block_set_title(block, line_new("Untitled", 9));
+						if(!in_block) {
+							//TODO handle error
+							printf("Error: Block not opened (Line:%d)\n", i);
+							continue;
+						}
+						goto push_block;
           } else if (COMPARE_DELIM(section, TITLE_DELIM)) {
+						if (!in_block) {
+							//TODO handle Error
+							printf("Error: Title not in block (Line:%d)\n", i);
+							continue;
+						}
             const char *title = strip_line + j + TITLE_LENGTH + 2;
-            block_set_title(block,
-                            line_new(title, strlen - j - TITLE_LENGTH - 2));
+            block_set_title(block, line_new(title, strlen - j - TITLE_LENGTH - 2));
           } else if (COMPARE_DELIM(section, DESC_DELIM)) {
+						if (!in_block) {
+							//TODO handle Error
+							printf("Error: Title not in block\n");
+							continue;
+						}
 						Text *desc = text_new();
 						Line *line = line_new(strip_line + j + DESC_LENGTH + 2, strlen - j - DESC_LENGTH - 2);
 						text_push(desc, line);
-						block_set_desc(block, text_new());
+						block_set_desc(block, desc);
 						block_type = 1;
+					} else if (COMPARE_DELIM(section, FILE_DESC_DELIM)) {
+						Text *desc = text_new();
+						Line *line = line_new(strip_line + j + FILE_DESC_LENGTH + 2, strlen - j - FILE_DESC_LENGTH - 2);
+						text_push(desc, line);
+						block_set_desc(block, desc);
+						block_type = FILE_DESC_BLOCK;
+						goto push_block;
 					}
           ignore = true;
+					
         }
       }
     }
     if (in_block && !ignore) {
       block_push_line(block, line_new(line, strlen));
     }
+		continue;
+		push_block: {
+			block->type = block_type;
+			list_push(blocks, block);
+			block = block_new();
+			block_type = 0;
+			block_set_title(block, line_new("Untitled", 9));
+			in_block = false;
+		}
   }
 
   return (Block **)list_to_array(blocks, sizeof(Block));

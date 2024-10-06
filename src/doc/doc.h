@@ -16,6 +16,11 @@
 #define END_LINE DELIM
 #endif
 
+#ifndef FILE_DESC_DELIM
+#define FILE_DESC_DELIM "FILEDESC"
+#define FILE_DESC_LENGTH 8
+#endif
+
 #ifndef SECTION_START_DELIM
 #define SECTION_START_DELIM "SECTION"
 #define SECTION_START_LENGTH 7
@@ -52,6 +57,8 @@
 #define TEXT_BLOCK 0x02
 #define TODO_BLOCK 0x04
 #define WARN_BLOCK 0x08
+#define SECTION_BLOCK 0x10
+#define FILE_DESC_BLOCK 0x20
 
 #ifndef CONCAT_DELIM
 
@@ -74,7 +81,7 @@ static inline bool compare_delim(const char *s, const char *expression) {
 
 #endif
 
-//@BLOCK
+//@SECTION
 //@TITLE Types
 
 typedef struct {
@@ -90,7 +97,8 @@ typedef struct {
 typedef struct {
   Line *title;
   Text *desc;
-  Text **lines;
+  Text *lines;
+	unsigned int type;
 } Block;
 
 typedef struct {
@@ -105,7 +113,7 @@ typedef struct {
 
 //@END
 
-//@SECTION
+//@BLOCK
 //@TITLE Functions
 
 Line *line_new(char *content, size_t size);

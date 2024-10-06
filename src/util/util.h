@@ -5,7 +5,7 @@
 #include <stdbool.h>
 
 
-static bool fxMemAllocMessages = true; 
+static bool fxMemAllocMessages = false; 
 
 #ifndef fxMemAlloc
 
