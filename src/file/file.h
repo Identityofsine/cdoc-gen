@@ -5,6 +5,7 @@
 #include <string.h>
 #include <unistd.h>
 #include <dirent.h>
+#include <libgen.h>
 #include "../list/list.h"
 
 #ifdef _WIN32
@@ -39,13 +40,12 @@ char *strip_path(const char *path) {
 	return source;
 }
 
-char *strip_file(const char *path) {
-	char *source = strrchr(path, '/');
-	if (source == NULL) {
-		source = path;
-	} else
-		source++;
-	return source;
+char* strip_file(char *path) {
+	//../src/file/file.h
+	//remove the file name from the path
+	char *source = strdup(path);
+	char *dir = dirname(source);
+	return dir;
 }
 
 char *strip_ext(const char *path) {

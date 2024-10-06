@@ -76,7 +76,11 @@ int main(int argc, char **argv) {
 
 		uint lines_count = content_length(lines);
 		Block **block = doc_parse(lines, lines_count);
-		write_markdown(path, CONCAT_STRING(remove_ext(strip_path(path)), ".md"), strip_file(path), block, doc_length(block));
+		const char *filename = remove_ext(strip_path(path));
+		const char *pathname = strip_file(path);
+		const char *md_filename = CONCAT_STRING(filename, ".md");
+		printf("Filename: %s/%s\n", pathname, md_filename);
+		write_markdown(path, md_filename, CONCAT_STRING(CONCAT_STRING(pathname, "/"), md_filename), block, doc_length(block));
 		if (block == NULL) {
 			fprintf(stderr, "Error: Could not parse the file: %s\n", path);
 			continue;
