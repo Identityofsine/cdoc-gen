@@ -5,7 +5,7 @@
 #include <stdbool.h>
 
 
-static bool fxMemAllocMessages = false; 
+static bool fxMemAllocMessages = true; 
 
 #ifndef fxMemAlloc
 
@@ -55,6 +55,9 @@ inline static void *_fxMemRealloc(void *ptr, size_t size, const char *source) {
 		} else {
 			printf("[UNKNOWN] Reallocating %lu bytes\n", size);
 		}
+	}
+	if (ptr == NULL) {
+		return malloc(size);
 	}
   return realloc(ptr, size);
 }

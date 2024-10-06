@@ -45,10 +45,21 @@ void handle_args(int argc, char **argv) {
 int main(int argc, char **argv) {
 	
 	
-	char *path = "../src";
+	char *path = NULL;
+
 	if (argc > 1) {
 		path = argv[1];
 	}
+	if (path == NULL) {
+		fprintf(stderr, "Error: Path Missing\n");
+		return 1;
+	}
+
+	//strip '/' from the end of the path if it exists
+	if (path[strlen(path) - 1] == '/') {
+		path[strlen(path) - 1] = '\0';
+	}
+
 	List *files = search_path(path, true);
 	if (files == NULL) {
 		fprintf(stderr, "Error: Could not search path %s\n", path);
@@ -56,6 +67,7 @@ int main(int argc, char **argv) {
 	}
 
 	for(int i = 0; i < files->size; i++) {
+		printf("File: %s\n", (char*)list_get(files, i)->data);
 		char* path = (char*)list_get(files, i)->data;
 		if (path == NULL) {
 			fprintf(stderr, "Error: Could not get file path\n");
@@ -65,7 +77,7 @@ int main(int argc, char **argv) {
 		FILE *file = file_open(path);
 		if (file == NULL) {
 			fprintf(stderr, "Error: Could not open file %s\n", path);
-			return 1;
+			continue;
 		}
 		char **lines = file_contents(file);
 		if (lines == NULL) {
@@ -76,10 +88,14 @@ int main(int argc, char **argv) {
 
 		uint lines_count = content_length(lines);
 		Block **block = doc_parse(lines, lines_count);
+		if (block == NULL) {
+			fprintf(stderr, "Error: Could not parse the file: %s\n", path);
+			continue;
+		}
 		const char *filename = remove_ext(strip_path(path));
 		const char *pathname = strip_file(path);
 		const char *md_filename = CONCAT_STRING(filename, ".md");
-		write_markdown(path, md_filename, CONCAT_STRING(CONCAT_STRING(pathname, "/"), md_filename), block, doc_length(block));
+		//write_markdown(path, md_filename, CONCAT_STRING(CONCAT_STRING(pathname, "/"), md_filename), block, doc_length(block));
 		if (block == NULL) {
 			fprintf(stderr, "Error: Could not parse the file: %s\n", path);
 			continue;
@@ -90,7 +106,6 @@ int main(int argc, char **argv) {
 					printf("Block is null\n");
 					break;
 				}
-				block[i] = NULL;
 			}
 		}
 	}

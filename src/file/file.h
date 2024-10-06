@@ -7,6 +7,7 @@
 #include <dirent.h>
 #include <libgen.h>
 #include "../list/list.h"
+#include "../util/util.h"
 
 #ifdef _WIN32
 #define DELIM 0x0d
@@ -73,14 +74,15 @@ char *remove_ext(const char *path) {
 //@BLOCK
 //@TITLE Push a value onto an array
 //@DESC Pushes a value onto an array of strings.
-char **push(char **arr, char *val) {
-  size_t len = 0;
-  while (arr[len] != NULL) {
-    len++;
-  }
-  arr = realloc(arr, sizeof(char *) * (len + 2));
-  arr[len] = val;
-  arr[len + 1] = NULL;
+char **push(char **arr, char *val, size_t len) {
+ 	char **new_arr = realloc(arr, sizeof(char *) * (len + 1)); 
+	if (new_arr == NULL) {
+		fprintf(stderr, "Error: Could not allocate memory for array\n");
+		//maybe free
+		return NULL;
+	}
+	arr = new_arr;
+	arr[len] = val;
   return arr;
 }
 //@END
@@ -115,48 +117,62 @@ bool file_close(FILE *file) {
 //@TITLE Read the contents of a file
 //@DESC Reads the contents of a file and returns them as an array of strings.
 char **file_contents(FILE *file) {
-  //@1 get the size of the file
-  fseek(file, 0, SEEK_END); 
-  if (ftell(file) == -1) {
-    //@TODO handle error
-    fprintf(stderr, "Error: Could not read file size\n");
-    return NULL;
-  }
-  size_t size = ftell(file);
-  rewind(file);
-  //@1 allocate memory for the file contents
-  char *contents = malloc(size);
-  if (contents == NULL) {
-    //@TODO handle error
-    fprintf(stderr, "Error: Could not allocate memory for file contents\n");
-    return NULL;
-  }
-  //@1 read the file contents
-  if (fread(contents, 1, size, file) != size) {
-    //@TODO handle error
-    fprintf(stderr, "Error: Could not read file contents\n");
-    return NULL;
-  } else {
+    //@1 get the size of the file
+    fseek(file, 0, SEEK_END);
+    long size = ftell(file);  // Use long since ftell() can return -1 on error
+    if (size == -1) {
+        fprintf(stderr, "Error: Could not read file size\n");
+        return NULL;
+    }
+    rewind(file);
+
+    //@1 allocate memory for the file contents (+1 for null terminator)
+    char *contents = malloc(size + 1);
+    if (contents == NULL) {
+        fprintf(stderr, "Error: Could not allocate memory for file contents\n");
+        return NULL;
+    }
+
+    //@1 read the file contents
+    if (fread(contents, 1, size, file) != (size_t)size) {
+        fprintf(stderr, "Error: Could not read file contents\n");
+        free(contents);  // Free memory on error
+        return NULL;
+    }
+    contents[size] = '\0';  // Null terminate the file contents
+
     //@1 split the file contents into newlines
     size_t line_count = 0;
     char *line = strtok(contents, GET_DELIM);
-    char **lines = malloc(sizeof(char *) * (line_count + 1));
-    while (line != NULL) {
-      lines = push(lines, line);
-      line = strtok(NULL, GET_DELIM);
-      line_count++;
-    }
+    char **lines = malloc(sizeof(char *));  // Allocate initial space for one line
+
     if (lines == NULL) {
-      //@TODO handle error
-      fprintf(stderr, "Error: Could not allocate memory for file lines\n");
-      return NULL;
+        fprintf(stderr, "Error: Could not allocate memory for lines\n");
+        free(contents);  // Free contents if lines allocation fails
+        return NULL;
     }
-    lines[line_count] = "\0\0";
-    return lines;
-  }
-  return NULL;
-}
-//@END
+
+    while (line != NULL) {
+        lines = push(lines, line, line_count);
+        if (lines == NULL) {
+            free(contents);  // Free contents if reallocation fails
+            return NULL;
+        }
+        line_count++;
+        line = strtok(NULL, GET_DELIM);
+    }
+
+    lines = realloc(lines, (line_count + 1) * sizeof(char *));  // Allocate space for NULL termination
+    if (lines == NULL) {
+        fprintf(stderr, "Error: Could not reallocate memory for final lines array\n");
+        free(contents);
+        return NULL;
+    }
+
+    lines[line_count] = NULL;  // Null terminate the array of lines
+
+    return lines;  // Return the array of lines
+}//@END
 
 
 

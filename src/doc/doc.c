@@ -4,23 +4,28 @@
 #include <string.h>
 
 Line *line_new(char *content, size_t size) {
+	printf("line_new(%s, %lu)\n", content, size);
   Line *line = fxMemAlloc(sizeof(Line));
+	line->size = (size_t)fxMemAlloc(sizeof(size_t));
   line->content = fxMemAlloc(size + 1);
 	strncpy(line->content, content, size + 1);
-  line->size = size;
+	line->size = size;
   return line;
 }
 
 Text *text_new() {
   Text *text = fxMemAlloc(sizeof(Text));
-  text->lines = NULL;
+  text->lines = fxMemAlloc(sizeof(Line *));
   text->size = 0;
   return text;
 }
 
 Text *text_push(Text *text, Line *line) {
-  text->lines = fxMemRealloc(text->lines, sizeof(Line *) * (text->size + 1));
-  text->lines[text->size] = line;
+	if (text == NULL) {
+		printf("Error: Text is null\n");
+		return NULL;
+	}
+	int sz = (text->size);
   text->size++;
   return text;
 }
@@ -37,7 +42,6 @@ Block *block_new() {
   block->title = NULL;
   block->desc = NULL;
   block->lines = fxMemAlloc(sizeof(Text *));
-  *block->lines = text_new();
   return block;
 }
 
@@ -136,7 +140,7 @@ void free_block(Block* block) {
 		free_description(block->desc);
 	}
 	if (block->lines != NULL) {
-		free_text(*block->lines);
+		fxMemFree(block->lines);
 	}
 	fxMemFree(block);
 }
