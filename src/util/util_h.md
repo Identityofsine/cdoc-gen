@@ -1,17 +1,8 @@
-#pragma once
-#include <memory.h>
-#include <stdio.h>
-#include <stdlib.h>
-#include <stdbool.h>
-
-
-static bool fxMemAllocMessages = false; 
-
-//@SECTION
-//@TITLE Custom Memory Allocation Functions
-//@DESC These functions/macros are used to allocate, free, and reallocate memory using the already defined malloc, free, and realloc functions. These functions are just wrappers that make it a bit safer and easier to debug.
+# util.h
+#### Custom Memory Allocation Functions
+These functions/macros are used to allocate, free, and reallocate memory using the already defined malloc, free, and realloc functions. These functions are just wrappers that make it a bit safer and easier to debug.
+```c
 #ifndef fxMemAlloc
-
 inline static void *_fxMemAlloc(size_t size, const char *source) {
 	if (fxMemAllocMessages) {
 		if (source) {
@@ -22,13 +13,9 @@ inline static void *_fxMemAlloc(size_t size, const char *source) {
 	}
   return malloc(size);
 }
-
 #define fxMemAlloc(size) _fxMemAlloc(size, __FUNCTION__)
-
 #endif
-
 #ifndef fxMemFree
-
 inline static void _fxMemFree(void *ptr, const char *source) {
 	if (fxMemAllocMessages) {
 		if (source) {
@@ -44,13 +31,9 @@ inline static void _fxMemFree(void *ptr, const char *source) {
 		printf("Error: Attempted to free NULL pointer (SAVED YOU... %s)\n", source);
 	}
 }
-
 #define fxMemFree(ptr) _fxMemFree(ptr, __FUNCTION__)
-
 #endif
-
 #ifndef fxMemRealloc
-
 inline static void *_fxMemRealloc(void *ptr, size_t size, const char *source) {
 	if (fxMemAllocMessages) {
 		if (source) {
@@ -64,29 +47,6 @@ inline static void *_fxMemRealloc(void *ptr, size_t size, const char *source) {
 	}
   return realloc(ptr, size);
 }
-
 #define fxMemRealloc(ptr, size) _fxMemRealloc(ptr, size, __FUNCTION__)
-
 #endif
-
-//@END
-
-inline static const char* strip_whitespace_from_start(const char *str) {
-	while (*str == ' ' || *str == '\t' || *str == 0x20) {
-		str++;
-	}
-	return str;
-}
-
-#ifndef CONCAT_STRING 
-
-inline static const char *concat_string(const char *a, const char *b) {
-	char *result = malloc(strlen(a) + strlen(b) + 1);
-	strcpy(result, a);
-	strcat(result, b);
-	return result;
-}
-#define CONCAT_STRING(a, b) concat_string(a, b)
-
-#endif
-
+```

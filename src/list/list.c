@@ -43,7 +43,7 @@ void **list_to_array(List *list, unsigned long size) {
   return array;
 }
 
-//@BLOCk
+//@BLOCK
 //@TITLE list_merge 
 //@DESC Merges two lists into one. The function should return a new list that contains all the elements of the two input lists.
 List* list_merge(List* list_1, List* list_2) {

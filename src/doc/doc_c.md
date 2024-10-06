@@ -1,11 +1,7 @@
-#include "doc.h"
-#include "../util/util.h"
-#include <stdio.h>
-#include <string.h>
-
-//@SECTION
-//@TITLE Line, Text, and Block Pointer based functions 
-//@DESC Functions for working with Line, Text, and Block pointers. These either create, modify, and destory these pointers.
+# doc.c
+#### Line, Text, and Block Pointer based functions 
+Functions for working with Line, Text, and Block pointers. These either create, modify, and destory these pointers.
+```c
 Line *line_new(char *content, size_t size) {
   Line *line = fxMemAlloc(sizeof(Line));
 	line->size = (size_t)fxMemAlloc(sizeof(size_t));
@@ -14,14 +10,12 @@ Line *line_new(char *content, size_t size) {
 	line->size = size;
   return line;
 }
-
 Text *text_new() {
   Text *text = fxMemAlloc(sizeof(Text));
 	text->lines = fxMemAlloc(sizeof(Line *));
   text->size = 0;
   return text;
 }
-
 Text *text_push(Text *text, Line *line) {
 	if (text == NULL) {
 		printf("Error: Text is null\n");
@@ -33,14 +27,12 @@ Text *text_push(Text *text, Line *line) {
 	text->lines[sz] = line;
   return text;
 }
-
 Text *text_stack(Text *text, Text *other) {
   for (size_t i = 0; i < other->size; i++) {
     text_push(text, other->lines[i]);
   }
   return text;
 }
-
 Block *block_new() {
   Block *block = fxMemAlloc(sizeof(Block));
   block->title = NULL;
@@ -49,17 +41,13 @@ Block *block_new() {
 	block->type = 0;
   return block;
 }
-
 void block_set_title(Block *block, Line *title) { 
 	block->title = title; 
 }
-
 void block_set_desc(Block *block, Text *desc) { block->desc = desc; }
-
 void block_push_line(Block *block, Line *line) {
   text_push(block->lines, line);
 }
-
 void block_print(Block *block) {
   if (block->title != NULL) {
     printf("Title: %s\n", block->title->content);
@@ -79,20 +67,10 @@ void block_print(Block *block) {
     }
   }
 }
-
-//@END
-
-unsigned long doc_length(Block **block) {
-	unsigned long count = 0;
-	while (block[count] != NULL) {
-		count++;
-	}
-	return count;
-}
-
-//@SECTION
-//@TITLE Free Functions
-//@DESC Functions for freeing memory allocated for Line, Text, and Block pointers.
+```
+#### Free Functions
+Functions for freeing memory allocated for Line, Text, and Block pointers.
+```c
 void free_title(Line* title) {
 	if (title == NULL) {
 		return;
@@ -104,7 +82,6 @@ void free_title(Line* title) {
 	fxMemFree(title->content);
 	fxMemFree(title);
 }
-
 void free_description(Text* desc) {
 	if (desc == NULL) {
 		return;
@@ -120,7 +97,6 @@ void free_description(Text* desc) {
 	fxMemFree(desc->lines);
 	fxMemFree(desc);
 }
-
 void free_text(Text* text) {
 	if (text == NULL) {
 		return;
@@ -136,7 +112,6 @@ void free_text(Text* text) {
 	fxMemFree(text->lines);
 	fxMemFree(text);
 }
-
 void free_block(Block* block) {
 	if(block == NULL) {
 		return;
@@ -152,11 +127,10 @@ void free_block(Block* block) {
 	}
 	fxMemFree(block);
 }
-//@END
-
-//@BLOCK
-//@TITLE doc_parse 
-//@DESC Parses a file into a list of blocks. The function reads the file line by line and creates a block for each section. The function returns an array of blocks.
+```
+#### doc_parse 
+Parses a file into a list of blocks. The function reads the file line by line and creates a block for each section. The function returns an array of blocks.
+```c
 Block **doc_parse(char **lines, size_t size) {
 	//create linked list
   List *blocks = list_new();
@@ -195,7 +169,6 @@ Block **doc_parse(char **lines, size_t size) {
     if (strlen == 0) {
       continue;
     }
-
     // now check if the line is a comment
 		//strip whitespace from the start of the line
 		const char* strip_line = strip_whitespace_from_start(line);
@@ -219,7 +192,6 @@ Block **doc_parse(char **lines, size_t size) {
 						in_block = true;
 						block_type = SECTION_BLOCK; 
 						//start section
-						//@WARN this is a special case where the section is the title, it also will be adjusted to have a stack of blocks where nesting is expected.
 					}
 					else if (COMPARE_DELIM(section, BLOCK_DELIM)) {
 						if (in_block) {
@@ -262,7 +234,6 @@ Block **doc_parse(char **lines, size_t size) {
 						//set description block
 						block_set_desc(block, desc);
 						block_type = 1;
-						//@WARN COMPARE_DELIM(section, DESC_DELIM) only reads one line
 					} else if (COMPARE_DELIM(section, FILE_DESC_DELIM)) {
 						//insert file description block (special case)
 						Text *desc = text_new();
@@ -292,8 +263,7 @@ Block **doc_parse(char **lines, size_t size) {
 			in_block = false;
 		}
   }
-
 	//use linked list to create array
   return (Block **)list_to_array(blocks, sizeof(Block));
 }
-//@END
+```

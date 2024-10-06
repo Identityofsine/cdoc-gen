@@ -70,7 +70,6 @@ int main(int argc, char **argv) {
 	}
 
 	for(int i = 0; i < files->size; i++) {
-		//printf("File: %s\n", (char*)list_get(files, i)->data);
 		char* path = (char*)list_get(files, i)->data;
 		if (path == NULL) {
 			fprintf(stderr, "Error: Could not get file path\n");

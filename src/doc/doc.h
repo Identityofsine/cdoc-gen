@@ -4,6 +4,9 @@
 #include <stdbool.h>
 #include <string.h>
 
+//@SECTION
+//@TITLE Documentation Macros
+
 #ifndef COMMENT_DELIM
 #define COMMENT_DELIM "//"
 #endif
@@ -59,7 +62,10 @@
 #define WARN_BLOCK 0x08
 #define SECTION_BLOCK 0x10
 #define FILE_DESC_BLOCK 0x20
+//@END
 
+//@SECTION
+//@TITLE Concatenation Macros 
 #ifndef CONCAT_DELIM
 
 static inline const char *concat_delim(const char *delim,
@@ -80,10 +86,11 @@ static inline bool compare_delim(const char *s, const char *expression) {
 #define COMPARE_DELIM(s, a) compare_delim(s, a)
 
 #endif
+//@END
 
 //@SECTION
 //@TITLE Types
-
+//@DESC Types for working with documentation. These types are subject to change, I plan on adding more features to the documentation system such as having nested blocks in sections, which allow for more complex documentation structures. Eventually, I would like to have a look-up table for documentation, which would allow for a central location to access documentation for a project.
 typedef struct {
   char *content;
   size_t size;

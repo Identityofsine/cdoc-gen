@@ -18,23 +18,31 @@ void write_markdown(const char* source_file, const char* filename, const char* p
 	char *ext = strrchr(source, '.');
 	ext = ext + 1;	
 	char *modi = NULL;
+	//are you a c or h file?
 	if(strcmp(ext, "h") == 0 || strcmp(ext, "c") == 0) {
 		modi = ext;
-		ext = "c";
-	} 
+		if (strcmp(ext, "cpp") == 0 || strcmp(ext, "hpp") == 0) {
+			//if you are a cpp or hpp file, change the extension to cpp
+			ext = "cpp";
+		} else {
+			//if you are a c or h file, change the extension to c
+			ext = "c";
+		}
+	}  
 	// modify the filename if c and h files
-	
 	if (modi != NULL) {
 		path = remove_ext(path);
 		path = CONCAT_STRING(path, "_");
 		path = CONCAT_STRING(path, modi);
 		path = CONCAT_STRING(path, ".md");
 	}
+	//open file for writing
 	FILE *file = fopen(path, "w");
 	if (file == NULL) {
 		fprintf(stderr, "Error: Could not open file %s\n", path);
 		return;
 	}
+	// Write the title to the file
 	fprintf(file, "%s %s\n", MARKDOWN_H1, source);
 	// Write the blocks to the file
 	for (size_t i = 0; i < size; i++) {
@@ -43,6 +51,7 @@ void write_markdown(const char* source_file, const char* filename, const char* p
 			printf("Error: Block is null\n");
 			continue;
 		}
+		// Write file description (if present)
 		if (block->type == FILE_DESC_BLOCK) {
 			if (block->desc != NULL) {
 				for (size_t j = 0; j < block->desc->size; j++) {
@@ -53,6 +62,7 @@ void write_markdown(const char* source_file, const char* filename, const char* p
 			}
 			continue;
 		}
+		// Write block title
 		if (block->title != NULL) {
 			const char *mark = MARKDOWN_H4;
 			if (block->type == SECTION_BLOCK) 
