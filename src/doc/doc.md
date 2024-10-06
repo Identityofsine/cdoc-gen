@@ -1,5 +1,5 @@
 # doc.md
-## Types{
+## Types
 ```c
 typedef struct {
   char *content;
@@ -7,22 +7,22 @@ typedef struct {
 } Line;
 typedef struct {
   Line **lines; // array of lines
-  size_t size;  // number of linesÃ™V
+  size_t size;  // number of lines
 } Text;
 typedef struct {
   Line *title;
-  Text *desc;{
+  Text *desc;
   Text **lines;
-} Block; «ÞB{
+} Block;
 typedef struct {
 	Block **blocks;
-	size_t size;{
-} Section;ÞB{
+	size_t size;
+} Section;
 typedef struct {
 	Section **sections;
-	size_t size;{
+	size_t size;
 } Doc;
 ```
-## Functions«ÞB{
+## Functions
 ```c
 ```

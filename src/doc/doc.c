@@ -5,8 +5,8 @@
 
 Line *line_new(char *content, size_t size) {
   Line *line = fxMemAlloc(sizeof(Line));
-  line->content = malloc(size + 1);
-	strncpy(line->content, content, size);
+  line->content = fxMemAlloc(size + 1);
+	strncpy(line->content, content, size + 1);
   line->size = size;
   return line;
 }
@@ -41,7 +41,9 @@ Block *block_new() {
   return block;
 }
 
-void block_set_title(Block *block, Line *title) { block->title = title; }
+void block_set_title(Block *block, Line *title) { 
+	block->title = title; 
+}
 
 void block_set_desc(Block *block, Text *desc) { block->desc = desc; }
 

@@ -1,26 +1,26 @@
 # file.md
-## Push a value onto an arrayÃ™V
+## Push a value onto an array
 ```c
 char **push(char **arr, char *val) {
   size_t len = 0;
-  while (arr[len] != NULL) {™V
-    len++;ÞB{
-  }B{
+  while (arr[len] != NULL) {
+    len++;
+  }
   arr = realloc(arr, sizeof(char *) * (len + 2));
   arr[len] = val;
   arr[len + 1] = NULL;
-  return arr;{
-}«ÞB{
+  return arr;
+}
 ```
-## Open a fileB{
+## Open a file
 ```c
 FILE *file_open(const char *path) {
   FILE *file = fopen(path, "r");
   if (file == NULL) {
-    fprintf(stderr, "Error: Could not open file %s\n", path);V
-  }B{
+    fprintf(stderr, "Error: Could not open file %s\n", path);
+  }
   return file;
-}«ÞB{
+}
 ```
 ## Untitled
 ```c
@@ -36,30 +36,30 @@ bool file_close(FILE *file) {
 char **file_contents(FILE *file) {
   fseek(file, 0, SEEK_END); 
   if (ftell(file) == -1) {
-    fprintf(stderr, "Error: Could not read file size\n");XÃ™V
+    fprintf(stderr, "Error: Could not read file size\n");
     return NULL;
   }
-  size_t size = ftell(file);™V
+  size_t size = ftell(file);
   rewind(file);
   char *contents = malloc(size);
   if (contents == NULL) {
-    fprintf(stderr, "Error: Could not allocate memory for file contents\n");™V
+    fprintf(stderr, "Error: Could not allocate memory for file contents\n");
     return NULL;
   }
   if (fread(contents, 1, size, file) != size) {
-    fprintf(stderr, "Error: Could not read file contents\n");V
+    fprintf(stderr, "Error: Could not read file contents\n");
     return NULL;
   } else {
     size_t line_count = 0;
-    char *line = strtok(contents, GET_DELIM);V
-    char **lines = malloc(sizeof(char *) * (line_count + 1));V
+    char *line = strtok(contents, GET_DELIM);
+    char **lines = malloc(sizeof(char *) * (line_count + 1));
     while (line != NULL) {
       lines = push(lines, line);
       line = strtok(NULL, GET_DELIM);
       line_count++;
     }
     if (lines == NULL) {
-      fprintf(stderr, "Error: Could not allocate memory for file lines\n");Ã™V
+      fprintf(stderr, "Error: Could not allocate memory for file lines\n");
       return NULL;
     }
     lines[line_count] = "\0\0";

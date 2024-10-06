@@ -1,4 +1,4 @@
 # list.md
-## list_merge B{
+## list_merge 
 ```c
 ```
