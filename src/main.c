@@ -12,6 +12,7 @@ void print_help() {
 	printf("  -h, --help\t\t\tPrint this help message and exit\n");
 	printf("  -v, --version\t\t\tPrint version information and exit\n");
 	printf("  -d, --debug\t\t\tPrint debug information\n");
+	printf("  -i, --ignore\t\t\tIgnore directories\n");
 }
 
 void print_version() {
@@ -45,16 +46,17 @@ void handle_args(int argc, char **argv) {
 int main(int argc, char **argv) {
 	
 	
-	//char *path = "/home/kevin/software/cin114/src";
+	char *path = "/home/kevin/software/xlan/";
 	
-	char *path = NULL;
+	//char *path = NULL;
 
 	
 	if (argc > 1) {
-		path = argv[1];
+	 path = argv[1];
 	}
 	if (path == NULL) {
 		fprintf(stderr, "Error: Path Missing\n");
+		print_help();
 		return 1;
 
 		//strip '/' from the end of the path if it exists
@@ -102,13 +104,8 @@ int main(int argc, char **argv) {
 			fprintf(stderr, "Error: Could not parse the file: %s\n", path);
 			continue;
 		} else {
-			Block *b = block[0];
-			for(int i = 0; block[i] != NULL; i++ ) {
-				if (block[i] == NULL) {
-					printf("Block is null\n");
-					free_block(b);
-					break;
-				}
+			for (size_t i = 0; i < doc_length(block); i++) {
+				free_block(block[i]);
 			}
 		}
 	}

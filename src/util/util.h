@@ -81,6 +81,14 @@ inline static const char* strip_whitespace_from_start(const char *str) {
 #ifndef CONCAT_STRING 
 
 inline static const char *concat_string(const char *a, const char *b) {
+	if (a == NULL) {
+		printf("Error: First string is NULL\n");
+		return b;
+	}
+	if (b == NULL) {
+		printf("Error: Second string is NULL\n");
+		return a;
+	}
 	char *result = malloc(strlen(a) + strlen(b) + 1);
 	strcpy(result, a);
 	strcat(result, b);

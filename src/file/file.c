@@ -16,6 +16,47 @@ bool is_md(const char *path) {
 	return strcmp(ext, ".md") == 0;
 }
 
+bool check_ext(const char *path, const char *ext) {
+	char *file_ext = strrchr(path, '.');
+	if (file_ext == NULL) {
+		return false;
+	}
+	return strcmp(file_ext, ext) == 0;
+}
+
+const char* programming_exts[] = {
+    ".c", ".cpp", ".h", ".hpp",            // C/C++
+    ".cs",                                 // C#
+    ".java", ".class",                     // Java
+    ".js", ".jsx",                         // JavaScript, React
+    ".ts", ".tsx",                         // TypeScript, React
+    ".py",                                 // Python
+    ".rb",                                 // Ruby
+    ".php",                                // PHP
+    ".go",                                 // Go
+    ".rs",                                 // Rust
+    ".swift",                              // Swift
+    ".kt", ".kts", ".ktm",                 // Kotlin
+    ".m", ".mm",                           // Objective-C/Objective-C++
+    ".r",                                  // R
+    ".pl",                                 // Perl
+    ".sh",                                 // Shell Script
+    ".bash", ".zsh",                       // Bash, Zsh
+    ".lua",                                // Lua
+    ".scala",                              // Scala
+    ".dart",                               // Dart
+    ".jl",                                 // Julia
+    ".erl", ".hrl",                        // Erlang
+    ".ex", ".exs",                         // Elixir
+    ".vb", ".vbs",                         // Visual Basic
+    ".hs",                                 // Haskell
+    ".ml", ".mli",                         // OCaml
+    ".fs", ".fsi", ".fsx", ".fsscript",    // F#
+    ".groovy",                             // Groovy
+    ".asm",                                // Assembly
+		"\0"
+};
+
 char *strip_path(const char *path) {
 	char *source = strrchr(path, '/');
 	if (source == NULL) {
@@ -155,6 +196,14 @@ char **file_contents(FILE *file) {
 //@END
 
 
+bool check_if_file_valid(const char *name) {
+	for (int i = 0; programming_exts[i][0] != '\0'; i++) {
+		if (check_ext(name, programming_exts[i])) {
+			return true;
+		}
+	}
+	return false;
+}
 
 //@BLOCK
 //@TITLE search_path
@@ -174,7 +223,7 @@ List* search_path(const char *path, bool recurisve) {
 	}
 	
 	while ((entry = readdir(folder))) {
-		if (entry->d_type == DT_REG && !is_md(entry->d_name)) { // If the entry is a regular file && ignore .md
+		if (entry->d_type == DT_REG && !is_md(entry->d_name) && check_if_file_valid(entry->d_name)) { // If the entry is a regular file && ignore .md
 			list_push(paths, CONCAT_DIRECTORY(path,entry->d_name));
 			files++;
 		} else if (entry->d_type == DT_DIR && recurisve) { // If the entry is a directory
