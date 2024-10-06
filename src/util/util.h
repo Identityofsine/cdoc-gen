@@ -1,3 +1,4 @@
+#pragma once
 #include <memory.h>
 #include <stdio.h>
 #include <stdlib.h>
@@ -33,7 +34,12 @@ inline static void _fxMemFree(void *ptr, const char *source) {
 			printf("[UNKNOWN] Freeing memory\n");
 		}
 	}
-  free(ptr);
+	if (ptr) {
+  	free(ptr);
+	}
+	else {
+		printf("Error: Attempted to free NULL pointer (SAVED YOU... %s)\n", source);
+	}
 }
 
 #define fxMemFree(ptr) _fxMemFree(ptr, __FUNCTION__)
@@ -56,3 +62,23 @@ inline static void *_fxMemRealloc(void *ptr, size_t size, const char *source) {
 #define fxMemRealloc(ptr, size) _fxMemRealloc(ptr, size, __FUNCTION__)
 
 #endif
+
+inline static const char* strip_whitespace_from_start(const char *str) {
+	while (*str == ' ' || *str == '\t' || *str == 0x20) {
+		str++;
+	}
+	return str;
+}
+
+#ifndef CONCAT_STRING 
+
+inline static const char *concat_string(const char *a, const char *b) {
+	char *result = malloc(strlen(a) + strlen(b) + 1);
+	strcpy(result, a);
+	strcat(result, b);
+	return result;
+}
+#define CONCAT_STRING(a, b) concat_string(a, b)
+
+#endif
+

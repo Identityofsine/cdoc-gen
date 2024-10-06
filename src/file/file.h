@@ -3,6 +3,9 @@
 #include <stdio.h>
 #include <stdlib.h>
 #include <string.h>
+#include <unistd.h>
+#include <dirent.h>
+#include "../list/list.h"
 
 #ifdef _WIN32
 #define DELIM 0x0d
@@ -10,6 +13,66 @@
 #define DELIM 0x0a
 #endif
 
+
+char *CONCAT_DIRECTORY(const char *path, const char *name) {
+	char *new_path = malloc(strlen(path) + strlen(name) + 2);
+	strcpy(new_path, path);
+	strcat(new_path, "/");
+	strcat(new_path, name);
+	return new_path;
+}
+
+bool is_md(const char *path) {
+	char *ext = strrchr(path, '.');
+	if (ext == NULL) {
+		return false;
+	}
+	return strcmp(ext, ".md") == 0;
+}
+
+char *strip_path(const char *path) {
+	char *source = strrchr(path, '/');
+	if (source == NULL) {
+		source = path;
+	} else
+		source++;
+	return source;
+}
+
+char *strip_file(const char *path) {
+	char *source = strrchr(path, '/');
+	if (source == NULL) {
+		source = path;
+	} else
+		source++;
+	return source;
+}
+
+char *strip_ext(const char *path) {
+	char *ext = strrchr(path, '.');
+	if (ext == NULL) {
+		return NULL;
+	}
+	return ext;
+}
+
+char *remove_ext(const char *path) {
+	char *ext = strrchr(path, '.');
+	if (ext == NULL) {
+		return NULL;
+	}
+	char *new_path = malloc(strlen(path) - strlen(ext) + 1);
+	strncpy(new_path, path, strlen(path) - strlen(ext));
+	new_path[strlen(path) - strlen(ext)] = '\0';
+	return new_path;
+}
+
+
+//@SECTION File I/O
+
+//@BLOCK
+//@TITLE Push a value onto an array
+//@DESC Pushes a value onto an array of strings.
 char **push(char **arr, char *val) {
   size_t len = 0;
   while (arr[len] != NULL) {
@@ -20,6 +83,7 @@ char **push(char **arr, char *val) {
   arr[len + 1] = NULL;
   return arr;
 }
+//@END
 
 //@BLOCK
 //@TITLE Open a file
@@ -31,7 +95,7 @@ FILE *file_open(const char *path) {
   if (file == NULL) {
     fprintf(stderr, "Error: Could not open file %s\n", path);
   }
-  //@ENDn
+  //@n
   //@1 return the file
   return file;
 }
@@ -45,12 +109,14 @@ bool file_close(FILE *file) {
 }
 //@END
 
+//@ENDSECTION
+
 //@BLOCK
 //@TITLE Read the contents of a file
 //@DESC Reads the contents of a file and returns them as an array of strings.
 char **file_contents(FILE *file) {
   //@1 get the size of the file
-  fseek(file, 0, SEEK_END);
+  fseek(file, 0, SEEK_END); 
   if (ftell(file) == -1) {
     //@TODO handle error
     fprintf(stderr, "Error: Could not read file size\n");
@@ -92,10 +158,49 @@ char **file_contents(FILE *file) {
 }
 //@END
 
+
+
+//@BLOCK
+//@TITLE search_path
+//@DESC Searches for files in a given path. This function should return an array of strings containing the paths of the files found, there should be an option to search recursively and for specific file extensions 
+List* search_path(const char *path, bool recurisve) {
+	List *paths = list_new();	
+	DIR *folder;
+	struct dirent *entry;
+	int files = 0;
+
+	printf("Searching path %s\n", path);
+
+	folder = opendir(path);
+	if(folder == NULL) {
+		fprintf(stderr, "Error: Could not open directory %s\n", path);
+		return NULL;
+	}
+	
+	while ((entry = readdir(folder))) {
+		if (entry->d_type == DT_REG && !is_md(entry->d_name)) { // If the entry is a regular file && ignore .md
+			list_push(paths, CONCAT_DIRECTORY(path,entry->d_name));
+			files++;
+		} else if (entry->d_type == DT_DIR && recurisve) { // If the entry is a directory
+			if (strcmp(entry->d_name, ".") != 0 && strcmp(entry->d_name, "..") != 0) {
+				List *temp = search_path(CONCAT_DIRECTORY(path, entry->d_name), recurisve);
+				paths = list_merge(paths, temp);
+			}
+		}
+	}
+
+	closedir(folder);
+	return paths;
+}
+
 unsigned int content_length(char **lines) {
-  unsigned int length = 0;
-  while (strncmp(lines[length], "\0\0", 2) != 0) {
-    length++;
-  }
+	//null safe	
+	if (lines == NULL) {
+		return 0;
+	}
+	unsigned int length = 0;
+	for (unsigned int i = 0; lines[i] != NULL; i++) {
+		length++;
+	}
   return length;
 }

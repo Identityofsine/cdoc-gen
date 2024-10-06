@@ -1,3 +1,4 @@
+#pragma once
 #include "../delim.h"
 #include "../list/list.h"
 #include <stdbool.h>
@@ -15,6 +16,16 @@
 #define END_LINE DELIM
 #endif
 
+#ifndef SECTION_START_DELIM
+#define SECTION_START_DELIM "SECTION"
+#define SECTION_START_LENGTH 7
+#endif
+
+#ifndef SECTION_END_DELIM
+#define SECTION_END_DELIM "ENDSECTION"
+#define SECTION_END_LENGTH 10
+#endif
+
 #ifndef TITLE_DELIM
 #define TITLE_DELIM "TITLE"
 #define TITLE_LENGTH 5
@@ -22,6 +33,7 @@
 
 #ifndef DESC_DELIM
 #define DESC_DELIM "DESC"
+#define DESC_LENGTH 4
 #endif
 
 #ifndef BLOCK_DELIM
@@ -62,7 +74,7 @@ static inline bool compare_delim(const char *s, const char *expression) {
 
 #endif
 
-//@SECTION
+//@BLOCK
 //@TITLE Types
 
 typedef struct {
@@ -81,6 +93,16 @@ typedef struct {
   Text **lines;
 } Block;
 
+typedef struct {
+	Block **blocks;
+	size_t size;
+} Section;
+
+typedef struct {
+	Section **sections;
+	size_t size;
+} Doc;
+
 //@END
 
 //@SECTION
@@ -96,7 +118,11 @@ void block_set_desc(Block *block, Text *desc);
 void block_push_line(Block *block, Line *line);
 
 void block_print(Block *block);
+void free_block(Block *block);
 
 Block **doc_parse(char **lines, size_t size);
+
+unsigned long doc_length(Block **block);
+
 
 //@END

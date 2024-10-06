@@ -42,3 +42,33 @@ void **list_to_array(List *list, unsigned long size) {
   array[list->size] = NULL;
   return array;
 }
+
+//@BLOCk
+//@TITLE list_merge 
+//@DESC Merges two lists into one. The function should return a new list that contains all the elements of the two input lists.
+List* list_merge(List* list_1, List* list_2) {
+	List* merged_list = list_new();
+	Node* node = list_1->head;	
+	while(node != NULL) {
+		list_push(merged_list, node->data);
+		node = node->next;
+	}
+	node = list_2->head;
+	while(node != NULL) {
+		list_push(merged_list, node->data);
+		node = node->next;
+	}
+	return merged_list;
+}
+//@END
+
+Node* list_get(List *list, size_t index) {
+	if (index >= list->size) {
+		return NULL;
+	}
+	Node *node = list->head;
+	for (size_t i = 0; i < index; i++) {
+		node = node->next;
+	}
+	return node;
+}
