@@ -169,7 +169,7 @@ List* search_path(const char *path, bool recurisve) {
 	struct dirent *entry;
 	int files = 0;
 
-	printf("Searching path %s\n", path);
+	printf("Searching path: %s\n", path);
 
 	folder = opendir(path);
 	if(folder == NULL) {

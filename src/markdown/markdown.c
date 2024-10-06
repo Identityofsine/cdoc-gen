@@ -25,6 +25,9 @@ void write_markdown(const char* source_file, const char* filename, const char* p
 		ext = "c";
 	} 
 
+	if (size == 0) {
+		return;
+	}
 
 	fprintf(file, "%s %s\n", MARKDOWN_H1, filename);
 
