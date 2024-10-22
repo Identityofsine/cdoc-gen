@@ -216,6 +216,9 @@ List* search_path(const char *path, bool recurisve) {
 
 	printf("Searching path: %s\n", path);
 
+	//find a file called .cdocignore and read the contents
+	//make sure to ignore the filetypes and paths in the .cdocignore file 
+
 	folder = opendir(path);
 	if(folder == NULL) {
 		fprintf(stderr, "Error: Could not open directory %s\n", path);
