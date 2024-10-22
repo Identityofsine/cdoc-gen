@@ -143,6 +143,8 @@ const char** write_markdown_links(List* paths) {
 			printf("Error: Could not get file path\n");
 			return NULL;
 		}
+		//TODO: I need to create a function/logic to change the path into a relative path to the root. Such as ignoring the root path and just getting the path from the root to the file. (i.e. ./src/file.c not /home/user/project/src/file.c or .././src/file.c)
+
 		//Assume Name to be name for now, a new struct will be created to hold the name and path.
 		const char *name = "name";
 		const char *link = CONCAT_STRING("[", name);
