@@ -2,10 +2,10 @@
 #### Write a markdown file
 Writes a markdown file from a list of blocks.
 ```c
-void write_markdown(const char* source_file, const char* filename, const char* path, Block** blocks, size_t size) {
+bool write_markdown(const char* source_file, const char* filename, const char* path, Block** blocks, size_t size) {
 	if (size == 0) {
 		printf("WARNING: %s has no blocks to write\n", source_file);
-		return;
+		return false;
 	}
 	//strip the path from the source file
 	char *source = strrchr(source_file, '/');
@@ -40,7 +40,7 @@ void write_markdown(const char* source_file, const char* filename, const char* p
 	FILE *file = fopen(path, "w");
 	if (file == NULL) {
 		fprintf(stderr, "Error: Could not open file %s\n", path);
-		return;
+		return false;
 	}
 	// Write the title to the file
 	fprintf(file, "%s %s\n", MARKDOWN_H1, source);
@@ -91,5 +91,75 @@ void write_markdown(const char* source_file, const char* filename, const char* p
 	}
 	fclose(file);
 	printf("Wrote markdown file: %s\n", path);
+	return true;
+}
+```
+#### write_markdown_links 
+Parses an array of paths into markdown links.
+```c
+const char** write_markdown_links(List* paths) {
+	if(paths == NULL) {
+		printf("Error: No paths to write\n");
+		return NULL;
+	}
+	Node* node = paths->head;	
+	if (node == NULL) {
+		printf("No paths to write\n");
+		return NULL;
+	}
+	//allocate memory for the links...
+	const char** links = (const char**)fxMemAlloc(sizeof(char*) * (paths->size + 1));
+	if (links == NULL) {
+		printf("Error: Could not allocate memory for links\n");
+		return NULL;
+	}
+	size_t idx = 0;
+	// start to convert paths into markdown links
+	while (node != NULL) {
+		if (node->data == NULL) {
+			printf("Error: Could not get file path\n");
+			return NULL;
+		}
+		char *path = (char*)node->data;
+		if (path == NULL) {
+			printf("Error: Could not get file path\n");
+			return NULL;
+		}
+		//Assume Name to be name for now, a new struct will be created to hold the name and path.
+		const char *name = "name";
+		const char *link = CONCAT_STRING("[", name);
+		link = CONCAT_STRING(link, "](");
+		link = CONCAT_STRING(link, path);
+		link = CONCAT_STRING(link, ")");
+		links[idx++] = link;
+		node = node->next;
+	}
+	links[idx] = NULL;
+	return links;
+}
+```
+#### write_markdown_readme
+Writes a markdown file for the README.md file.
+```c
+void write_markdown_readme(List* paths, const char* root) {
+	//this function should take in the paths and output a markdown file full of links
+	const char** links = write_markdown_links(paths);
+	if (links == NULL) {
+		printf("Error: Could not write markdown links\n");
+		return;
+	}
+	const char* readme = CONCAT_STRING(root, "/README.md");
+	readme = STRIP_DOUBLE_SLASHES(readme);
+	FILE* file = fopen(readme, "w");
+	if (file == NULL) {
+		printf("Error: Could not open file %s\n", readme);
+		return;
+	}
+	fprintf(file, "%s %s\n", MARKDOWN_H1, "README");
+	for (size_t i = 0; links[i] != NULL; i++) {
+		fprintf(file, "%s\n", links[i]);
+	}
+	fclose(file);
+	printf("Wrote README.md file\n");
 }
 ```

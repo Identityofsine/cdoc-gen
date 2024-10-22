@@ -96,5 +96,35 @@ inline static const char *concat_string(const char *a, const char *b) {
 }
 #define CONCAT_STRING(a, b) concat_string(a, b)
 
+
+#endif
+
+
+#ifndef STRIP_DOUBLE_SLASHES
+
+inline static const char *strip_double_slashes(const char *a) {
+	if (a == NULL) {
+		printf("Error: First string is NULL\n");
+		return "";
+	}
+
+	char* copy = (char*)fxMemAlloc(strlen(a) + 1);
+	strcpy(copy, a);
+
+	//strip double slashes, leave one and remove the rest
+	for (size_t i = 0; i < strlen(a); i++) {
+		if (copy[i] == '/' && copy[i + 1] == '/') {
+			size_t i_cpy = i;
+			while(copy[i + 1] == '/') {
+				i++;
+			}
+			memmove(copy + i_cpy + 1, copy + i + 1, strlen(copy) - i);
+		} 
+	}
+	return copy;
+}
+
+#define STRIP_DOUBLE_SLASHES(a) strip_double_slashes(a)
+
 #endif
 

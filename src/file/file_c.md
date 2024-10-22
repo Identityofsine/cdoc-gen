@@ -97,7 +97,7 @@ List* search_path(const char *path, bool recurisve) {
 	}
 	
 	while ((entry = readdir(folder))) {
-		if (entry->d_type == DT_REG && !is_md(entry->d_name)) { // If the entry is a regular file && ignore .md
+		if (entry->d_type == DT_REG && !is_md(entry->d_name) && check_if_file_valid(entry->d_name)) { // If the entry is a regular file && ignore .md
 			list_push(paths, CONCAT_DIRECTORY(path,entry->d_name));
 			files++;
 		} else if (entry->d_type == DT_DIR && recurisve) { // If the entry is a directory

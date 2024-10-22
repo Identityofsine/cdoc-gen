@@ -46,30 +46,31 @@ void handle_args(int argc, char **argv) {
 int main(int argc, char **argv) {
 	
 	
-	char *path = "/home/kevin/software/xlan/";
+	//char *path = "/home/kevin/software/xlan/";
 	
-	//char *path = NULL;
-
+	char *root = NULL;
 	
 	if (argc > 1) {
-	 path = argv[1];
+	 root = argv[1];
 	}
-	if (path == NULL) {
+	if (root == NULL) {
 		fprintf(stderr, "Error: Path Missing\n");
 		print_help();
 		return 1;
 
 		//strip '/' from the end of the path if it exists
-		if (path[strlen(path) - 1] == '/') {
-			path[strlen(path) - 1] = '\0';
+		if (root[strlen(root) - 1] == '/') {
+			root[strlen(root) - 1] = '\0';
 		}
 	}
 
-	List *files = search_path(path, true);
+	List *files = search_path(root, true);
 	if (files == NULL) {
-		fprintf(stderr, "Error: Could not search path %s\n", path);
+		fprintf(stderr, "Error: Could not search path %s\n", root);
 		return 1;
 	}
+
+	List *successful_paths = list_new();
 
 	for(int i = 0; i < files->size; i++) {
 		char* path = (char*)list_get(files, i)->data;
@@ -99,7 +100,7 @@ int main(int argc, char **argv) {
 		const char *filename = remove_ext(strip_path(path));
 		const char *pathname = strip_file(path);
 		const char *md_filename = CONCAT_STRING(filename, ".md");
-		write_markdown(path, md_filename, CONCAT_STRING(CONCAT_STRING(pathname, "/"), md_filename), block, doc_length(block));
+		bool success = write_markdown(path, md_filename, CONCAT_STRING(CONCAT_STRING(pathname, "/"), md_filename), block, doc_length(block));
 		if (block == NULL) {
 			fprintf(stderr, "Error: Could not parse the file: %s\n", path);
 			continue;
@@ -108,20 +109,27 @@ int main(int argc, char **argv) {
 				free_block(block[i]);
 			}
 		}
+
+		//if we got here, we can do other things and assume that a markdown file was created
+		//clean double slashes from the path
+		if (success)
+			list_push(successful_paths, STRIP_DOUBLE_SLASHES(path));
 	}
 	
+	Node *node = successful_paths->head;
+	while(node != NULL) {
+		//assume the path is a string
+		char *path = (char*)node->data;
+		if (path == NULL) {
+			fprintf(stderr, "Error: Could not get file path\n");
+			return 1;
+		}
+		node = node->next;
+	}
+
+	write_markdown_readme(successful_paths, root);
+	
+
 		
-	/*
-  FILE *file = file_open("../src/file/file.h");
-  char **lines = file_contents(file);
-  uint lines_count = content_length(lines);
-  file_close(file);
-  Block **block = doc_parse(lines, lines_count);
-  if (block == NULL) {
-    fprintf(stderr, "Error: Could not parse the file\n");
-    return 1;
-  }
- 	write_markdown("../src/file/file.h", "file.md", "../src/file/file.md", block, doc_length(block)); 
-	*/
   return 0;
 }

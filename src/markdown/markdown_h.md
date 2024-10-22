@@ -19,5 +19,7 @@
 ```
 ### Markdown Definitions
 ```c
-void write_markdown(const char* source_file, const char* filename, const char* path, Block** blocks, size_t size);
+bool write_markdown(const char* source_file, const char* filename, const char* path, Block** blocks, size_t size);
+const char** write_markdown_links(List* paths); 
+void write_markdown_readme(List* paths, const char* root);
 ```
